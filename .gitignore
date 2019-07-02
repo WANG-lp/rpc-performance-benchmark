@@ -1,0 +1,15 @@
+# jetbrain IDEs
+.idea/
+cmake-build-debug/
+
+
+build_Debug/
+build_Release/
+build/
+build.sh
+
+# vs code
+.vscode/
+
+# diff
+*.orig

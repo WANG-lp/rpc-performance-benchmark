@@ -11,15 +11,19 @@
 #include <grpcpp/impl/codegen/channel_interface.h>
 #include <grpcpp/impl/codegen/client_unary_call.h>
 #include <grpcpp/impl/codegen/client_callback.h>
-#include <grpcpp/impl/codegen/method_handler_impl.h>
+#include <grpcpp/impl/codegen/message_allocator.h>
+#include <grpcpp/impl/codegen/method_handler.h>
 #include <grpcpp/impl/codegen/rpc_service_method.h>
 #include <grpcpp/impl/codegen/server_callback.h>
+#include <grpcpp/impl/codegen/server_callback_handlers.h>
+#include <grpcpp/impl/codegen/server_context.h>
 #include <grpcpp/impl/codegen/service_type.h>
 #include <grpcpp/impl/codegen/sync_stream.h>
 namespace echo {
 
 static const char* Echo_method_names[] = {
   "/echo.Echo/echo",
+  "/echo.Echo/read",
 };
 
 std::unique_ptr< Echo::Stub> Echo::NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options) {
@@ -30,6 +34,7 @@ std::unique_ptr< Echo::Stub> Echo::NewStub(const std::shared_ptr< ::grpc::Channe
 
 Echo::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel)
   : channel_(channel), rpcmethod_echo_(Echo_method_names[0], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_read_(Echo_method_names[1], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   {}
 
 ::grpc::Status Echo::Stub::echo(::grpc::ClientContext* context, const ::echo::Req& request, ::echo::Rep* response) {
@@ -37,27 +42,55 @@ Echo::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel)
 }
 
 void Echo::Stub::experimental_async::echo(::grpc::ClientContext* context, const ::echo::Req* request, ::echo::Rep* response, std::function<void(::grpc::Status)> f) {
-  ::grpc::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_echo_, context, request, response, std::move(f));
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_echo_, context, request, response, std::move(f));
 }
 
 void Echo::Stub::experimental_async::echo(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::echo::Rep* response, std::function<void(::grpc::Status)> f) {
-  ::grpc::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_echo_, context, request, response, std::move(f));
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_echo_, context, request, response, std::move(f));
 }
 
 void Echo::Stub::experimental_async::echo(::grpc::ClientContext* context, const ::echo::Req* request, ::echo::Rep* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_echo_, context, request, response, reactor);
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_echo_, context, request, response, reactor);
 }
 
 void Echo::Stub::experimental_async::echo(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::echo::Rep* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_echo_, context, request, response, reactor);
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_echo_, context, request, response, reactor);
 }
 
 ::grpc::ClientAsyncResponseReader< ::echo::Rep>* Echo::Stub::AsyncechoRaw(::grpc::ClientContext* context, const ::echo::Req& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncResponseReaderFactory< ::echo::Rep>::Create(channel_.get(), cq, rpcmethod_echo_, context, request, true);
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::echo::Rep>::Create(channel_.get(), cq, rpcmethod_echo_, context, request, true);
 }
 
 ::grpc::ClientAsyncResponseReader< ::echo::Rep>* Echo::Stub::PrepareAsyncechoRaw(::grpc::ClientContext* context, const ::echo::Req& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncResponseReaderFactory< ::echo::Rep>::Create(channel_.get(), cq, rpcmethod_echo_, context, request, false);
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::echo::Rep>::Create(channel_.get(), cq, rpcmethod_echo_, context, request, false);
+}
+
+::grpc::Status Echo::Stub::read(::grpc::ClientContext* context, const ::echo::ReqLen& request, ::echo::Rep* response) {
+  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_read_, context, request, response);
+}
+
+void Echo::Stub::experimental_async::read(::grpc::ClientContext* context, const ::echo::ReqLen* request, ::echo::Rep* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_read_, context, request, response, std::move(f));
+}
+
+void Echo::Stub::experimental_async::read(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::echo::Rep* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_read_, context, request, response, std::move(f));
+}
+
+void Echo::Stub::experimental_async::read(::grpc::ClientContext* context, const ::echo::ReqLen* request, ::echo::Rep* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_read_, context, request, response, reactor);
+}
+
+void Echo::Stub::experimental_async::read(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::echo::Rep* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_read_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::echo::Rep>* Echo::Stub::AsyncreadRaw(::grpc::ClientContext* context, const ::echo::ReqLen& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::echo::Rep>::Create(channel_.get(), cq, rpcmethod_read_, context, request, true);
+}
+
+::grpc::ClientAsyncResponseReader< ::echo::Rep>* Echo::Stub::PrepareAsyncreadRaw(::grpc::ClientContext* context, const ::echo::ReqLen& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::echo::Rep>::Create(channel_.get(), cq, rpcmethod_read_, context, request, false);
 }
 
 Echo::Service::Service() {
@@ -66,12 +99,24 @@ Echo::Service::Service() {
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< Echo::Service, ::echo::Req, ::echo::Rep>(
           std::mem_fn(&Echo::Service::echo), this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      Echo_method_names[1],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< Echo::Service, ::echo::ReqLen, ::echo::Rep>(
+          std::mem_fn(&Echo::Service::read), this)));
 }
 
 Echo::Service::~Service() {
 }
 
 ::grpc::Status Echo::Service::echo(::grpc::ServerContext* context, const ::echo::Req* request, ::echo::Rep* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status Echo::Service::read(::grpc::ServerContext* context, const ::echo::ReqLen* request, ::echo::Rep* response) {
   (void) context;
   (void) request;
   (void) response;

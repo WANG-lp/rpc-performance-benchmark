@@ -10,6 +10,7 @@ build.sh
 
 # vs code
 .vscode/
+.history/
 
 # diff
 *.orig

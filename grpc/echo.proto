@@ -4,12 +4,17 @@ package echo;
 
 service Echo {
   rpc echo (Req) returns (Rep) {}
+  rpc read (ReqLen) returns (Rep) {}
 }
 
 message Req {
-  string message = 1;
+  bytes message = 1;
 }
 
 message Rep {
-  string message = 1;
+  bytes message = 1;
+}
+
+message ReqLen {
+  int32 message = 1;
 }

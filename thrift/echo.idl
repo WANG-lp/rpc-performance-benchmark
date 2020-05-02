@@ -2,4 +2,5 @@ namespace cpp Echo
 
 service Echo {
     binary echo(1:binary str)
+    binary read(1:i32 len)
 }

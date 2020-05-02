@@ -8,7 +8,7 @@
 
 using echo::Echo;
 using echo::Rep;
-using echo::Req;
+using echo::ReqLen;
 using grpc::Channel;
 using grpc::ClientAsyncResponseReader;
 using grpc::ClientContext;
@@ -25,16 +25,13 @@ int64_t get_wall_time() {
     return time.tv_sec * 1000000 + time.tv_usec;
 }
 class EchoClient {
-public:
-    explicit EchoClient(std::shared_ptr<Channel> channel)
-            : stub_(Echo::NewStub(channel)) {}
+   public:
+    explicit EchoClient(std::shared_ptr<Channel> channel) : stub_(Echo::NewStub(channel)) {}
 
-    // Assembles the client's payload, sends it and presents the response back
-    // from the server.
-    std::string echo(const std::string& user) {
+    std::string read(int32_t len) {
         // Data we are sending to the server.
-        Req request;
-        request.set_message(user);
+        ReqLen request;
+        request.set_message(len);
 
         // Container for the data we expect from the server.
         Rep reply;
@@ -54,8 +51,7 @@ public:
         // an instance to store in "call" but does not actually start the RPC
         // Because we are using the asynchronous API, we need to hold on to
         // the "call" instance in order to get updates on the ongoing RPC.
-        std::unique_ptr<ClientAsyncResponseReader<Rep> > rpc(
-                stub_->PrepareAsyncecho(&context, request, &cq));
+        std::unique_ptr<ClientAsyncResponseReader<Rep> > rpc(stub_->PrepareAsyncread(&context, request, &cq));
 
         // StartCall initiates the RPC call
         rpc->StartCall();
@@ -63,7 +59,7 @@ public:
         // Request that, upon completion of the RPC, "reply" be updated with the
         // server's response; "status" with the indication of whether the operation
         // was successful. Tag the request with the integer 1.
-        rpc->Finish(&reply, &status, (void*)1);
+        rpc->Finish(&reply, &status, (void*) 1);
         void* got_tag;
         bool ok = false;
         // Block until the next result is available in the completion queue "cq".
@@ -73,7 +69,7 @@ public:
 
         // Verify that the result from "cq" corresponds, by its tag, our previous
         // request.
-        GPR_ASSERT(got_tag == (void*)1);
+        GPR_ASSERT(got_tag == (void*) 1);
         // ... and that the request was completed successfully. Note that "ok"
         // corresponds solely to the request for updates introduced by Finish().
         GPR_ASSERT(ok);
@@ -86,12 +82,11 @@ public:
         }
     }
 
-private:
+   private:
     // Out of the passed in Channel comes the stub, stored here, our view of the
     // server's exposed services.
     std::unique_ptr<Echo::Stub> stub_;
 };
-
 
 int main(int argc, char** argv) {
     EchoClient client(grpc::CreateChannel("127.0.0.1:8080", grpc::InsecureChannelCredentials()));
@@ -104,13 +99,12 @@ int main(int argc, char** argv) {
     }
     printf("buff size is %ld\n", buff_size);
     printf("req num is %ld\n", REQNUM);
-    string buff(buff_size, 'x');
 
     int64_t start_time = get_wall_time();
     for (size_t i = 0; i < REQNUM; i++) {
-        auto ret = client.echo(buff);
+        auto ret = client.read(buff_size);
         // printf("ret: %d, buf: %.*s\n", ret, (int) out_length, out_buf);
-        if (ret.size() != buff.size()) {
+        if (ret.size() != buff_size) {
             printf("error");
         }
     }

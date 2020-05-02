@@ -25,15 +25,20 @@ class EchoHandler : virtual public EchoIf {
     printf("echo\n");
   }
 
+  void read(std::string& _return, const int32_t len) {
+    // Your implementation goes here
+    printf("read\n");
+  }
+
 };
 
 int main(int argc, char **argv) {
   int port = 9090;
-  ::apache::thrift::stdcxx::shared_ptr<EchoHandler> handler(new EchoHandler());
-  ::apache::thrift::stdcxx::shared_ptr<TProcessor> processor(new EchoProcessor(handler));
-  ::apache::thrift::stdcxx::shared_ptr<TServerTransport> serverTransport(new TServerSocket(port));
-  ::apache::thrift::stdcxx::shared_ptr<TTransportFactory> transportFactory(new TBufferedTransportFactory());
-  ::apache::thrift::stdcxx::shared_ptr<TProtocolFactory> protocolFactory(new TBinaryProtocolFactory());
+  ::std::shared_ptr<EchoHandler> handler(new EchoHandler());
+  ::std::shared_ptr<TProcessor> processor(new EchoProcessor(handler));
+  ::std::shared_ptr<TServerTransport> serverTransport(new TServerSocket(port));
+  ::std::shared_ptr<TTransportFactory> transportFactory(new TBufferedTransportFactory());
+  ::std::shared_ptr<TProtocolFactory> protocolFactory(new TBinaryProtocolFactory());
 
   TSimpleServer server(processor, serverTransport, transportFactory, protocolFactory);
   server.serve();
